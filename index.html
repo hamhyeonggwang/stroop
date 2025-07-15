@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stroop Game for Kids</title>
+  <style>
+    body {
+      background: #f9edcc;
+      font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #f28c28;
+      font-size: 3rem;
+      margin: 0.5em 0 0.2em 0;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    .mode-select {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin: 2em 0 1em 0;
+      width: 100%;
+    }
+    .mode-btn {
+      font-size: 1.5rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 18px;
+      padding: 1em 0;
+      width: 100%;
+      cursor: pointer;
+      transition: transform 0.1s;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .mode-btn.kor { background: #f28c28; color: #fff; }
+    .mode-btn.eng { background: #6fa8dc; color: #fff; }
+    .mode-btn.shape { background: #93c47d; color: #fff; }
+    .mode-btn.baby { background: #ffd966; color: #b45f06; }
+    .game-area {
+      margin-top: 2em;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .question {
+      font-size: 2.2rem;
+      font-weight: bold;
+      margin-bottom: 1.5em;
+      min-height: 2.5em;
+      text-align: center;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      width: 100%;
+    }
+    .choice-btn {
+      font-size: 1.5rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 16px;
+      padding: 1.2em 0;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.1s;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .choice-btn:active {
+      transform: scale(0.97);
+    }
+    .result {
+      font-size: 1.3rem;
+      margin: 1.5em 0 0.5em 0;
+      min-height: 2em;
+      text-align: center;
+    }
+    .next-btn {
+      margin-top: 1em;
+      font-size: 1.2rem;
+      padding: 0.7em 2em;
+      border-radius: 12px;
+      border: none;
+      background: #f28c28;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0001;
+    }
+    @media (max-width: 500px) {
+      .container { padding: 10px 0; }
+      h1 { font-size: 2.1rem; }
+      .question { font-size: 1.3rem; }
+      .mode-btn, .choice-btn { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>STROOP<br>GAME</h1>
+    <div id="modeScreen" class="mode-select">
+      <button class="mode-btn kor" onclick="startGame('kor')">한글 모드</button>
+      <button class="mode-btn eng" onclick="startGame('eng')">영어 모드</button>
+      <button class="mode-btn shape" onclick="startGame('shape')">모양 모드</button>
+      <button class="mode-btn baby" onclick="startGame('baby')">베이비 모드</button>
+    </div>
+    <div id="gameArea" class="game-area" style="display:none;"></div>
+  </div>
+  <script>
+    // 문제 데이터 예시
+    const QUESTIONS = {
+      kor: [
+        { word: '파랑', color: 'red', choices: ['파랑', '노랑', '초록', '빨강'], answer: '빨강' },
+        { word: '노랑', color: 'blue', choices: ['파랑', '노랑', '초록', '빨강'], answer: '파랑' },
+      ],
+      eng: [
+        { word: 'GREEN', color: 'yellow', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'YELLOW' },
+        { word: 'RED', color: 'blue', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'BLUE' },
+      ],
+      shape: [
+        { shape: 'circle', color: 'green', choices: ['동그라미', '세모', '네모', '별'], answer: '동그라미' },
+        { shape: 'triangle', color: 'red', choices: ['동그라미', '세모', '네모', '별'], answer: '세모' },
+      ],
+      baby: [
+        { img: '🍎', choices: ['사과', '바나나', '포도', '딸기'], answer: '사과' },
+        { img: '🍌', choices: ['사과', '바나나', '포도', '딸기'], answer: '바나나' },
+      ]
+    };
+    const COLOR_MAP = {
+      red: '#e06666',
+      blue: '#6fa8dc',
+      green: '#93c47d',
+      yellow: '#ffd966',
+      black: '#444',
+    };
+    let currentMode = null;
+    let currentIdx = 0;
+    let score = 0;
+
+    function startGame(mode) {
+      currentMode = mode;
+      currentIdx = 0;
+      score = 0;
+      document.getElementById('modeScreen').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'flex';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const area = document.getElementById('gameArea');
+      area.innerHTML = '';
+      const q = QUESTIONS[currentMode][currentIdx];
+      let questionHTML = '';
+      if (currentMode === 'kor') {
+        questionHTML = `<div class="question" style="color:${COLOR_MAP[q.color]}">${q.word}</div>`;
+      } else if (currentMode === 'eng') {
+        questionHTML = `<div class="question" style="color:${COLOR_MAP[q.color]}">${q.word}</div>`;
+      } else if (currentMode === 'shape') {
+        questionHTML = `<div class="question"><span style="font-size:3em;color:${COLOR_MAP[q.color]}">${shapeIcon(q.shape)}</span></div>`;
+      } else if (currentMode === 'baby') {
+        questionHTML = `<div class="question"><span style="font-size:3em;">${q.img}</span></div>`;
+      }
+      let choicesHTML = '<div class="choices">';
+      q.choices.forEach(choice => {
+        choicesHTML += `<button class="choice-btn" onclick="checkAnswer('${choice}')">${choice}</button>`;
+      });
+      choicesHTML += '</div>';
+      area.innerHTML = questionHTML + choicesHTML + '<div class="result" id="result"></div>';
+    }
+
+    function checkAnswer(choice) {
+      const q = QUESTIONS[currentMode][currentIdx];
+      const result = document.getElementById('result');
+      if (choice === q.answer) {
+        score++;
+        result.textContent = '정답!';
+        result.style.color = '#93c47d';
+      } else {
+        result.textContent = '오답!';
+        result.style.color = '#e06666';
+      }
+      setTimeout(() => {
+        nextQuestion();
+      }, 800);
+    }
+
+    function nextQuestion() {
+      currentIdx++;
+      if (currentIdx >= QUESTIONS[currentMode].length) {
+        showResult();
+      } else {
+        showQuestion();
+      }
+    }
+
+    function showResult() {
+      const area = document.getElementById('gameArea');
+      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode].length}</div><button class="next-btn" onclick="restart()">다시하기</button>`;
+    }
+
+    function restart() {
+      document.getElementById('modeScreen').style.display = 'flex';
+      document.getElementById('gameArea').style.display = 'none';
+    }
+
+    function shapeIcon(shape) {
+      if (shape === 'circle') return '●';
+      if (shape === 'triangle') return '▲';
+      if (shape === 'square') return '■';
+      if (shape === 'star') return '★';
+      return '?';
+    }
+  </script>
+</body>
+</html> 
