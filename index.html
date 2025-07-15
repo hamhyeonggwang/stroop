@@ -129,18 +129,50 @@
       kor: [
         { word: '파랑', color: 'red', choices: ['파랑', '노랑', '초록', '빨강'], answer: '빨강' },
         { word: '노랑', color: 'blue', choices: ['파랑', '노랑', '초록', '빨강'], answer: '파랑' },
+        { word: '초록', color: 'yellow', choices: ['초록', '노랑', '파랑', '빨강'], answer: '노랑' },
+        { word: '빨강', color: 'green', choices: ['빨강', '노랑', '초록', '파랑'], answer: '초록' },
+        { word: '노랑', color: 'green', choices: ['빨강', '노랑', '초록', '파랑'], answer: '초록' },
+        { word: '초록', color: 'red', choices: ['빨강', '노랑', '초록', '파랑'], answer: '빨강' },
+        { word: '파랑', color: 'yellow', choices: ['빨강', '노랑', '초록', '파랑'], answer: '노랑' },
+        { word: '빨강', color: 'blue', choices: ['빨강', '노랑', '초록', '파랑'], answer: '파랑' },
+        { word: '노랑', color: 'red', choices: ['빨강', '노랑', '초록', '파랑'], answer: '빨강' },
+        { word: '초록', color: 'blue', choices: ['빨강', '노랑', '초록', '파랑'], answer: '파랑' },
       ],
       eng: [
         { word: 'GREEN', color: 'yellow', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'YELLOW' },
         { word: 'RED', color: 'blue', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'BLUE' },
+        { word: 'YELLOW', color: 'green', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'GREEN' },
+        { word: 'BLUE', color: 'red', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'RED' },
+        { word: 'RED', color: 'green', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'GREEN' },
+        { word: 'YELLOW', color: 'blue', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'BLUE' },
+        { word: 'GREEN', color: 'red', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'RED' },
+        { word: 'BLUE', color: 'yellow', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'YELLOW' },
+        { word: 'YELLOW', color: 'red', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'RED' },
+        { word: 'GREEN', color: 'blue', choices: ['GREEN', 'YELLOW', 'BLUE', 'RED'], answer: 'BLUE' },
       ],
       shape: [
         { shape: 'circle', color: 'green', choices: ['동그라미', '세모', '네모', '별'], answer: '동그라미' },
         { shape: 'triangle', color: 'red', choices: ['동그라미', '세모', '네모', '별'], answer: '세모' },
+        { shape: 'square', color: 'blue', choices: ['동그라미', '세모', '네모', '별'], answer: '네모' },
+        { shape: 'star', color: 'yellow', choices: ['동그라미', '세모', '네모', '별'], answer: '별' },
+        { shape: 'circle', color: 'red', choices: ['동그라미', '세모', '네모', '별'], answer: '동그라미' },
+        { shape: 'triangle', color: 'green', choices: ['동그라미', '세모', '네모', '별'], answer: '세모' },
+        { shape: 'square', color: 'yellow', choices: ['동그라미', '세모', '네모', '별'], answer: '네모' },
+        { shape: 'star', color: 'blue', choices: ['동그라미', '세모', '네모', '별'], answer: '별' },
+        { shape: 'circle', color: 'yellow', choices: ['동그라미', '세모', '네모', '별'], answer: '동그라미' },
+        { shape: 'triangle', color: 'blue', choices: ['동그라미', '세모', '네모', '별'], answer: '세모' },
       ],
       baby: [
         { img: '🍎', choices: ['사과', '바나나', '포도', '딸기'], answer: '사과' },
         { img: '🍌', choices: ['사과', '바나나', '포도', '딸기'], answer: '바나나' },
+        { img: '🍇', choices: ['사과', '바나나', '포도', '딸기'], answer: '포도' },
+        { img: '🍓', choices: ['사과', '바나나', '포도', '딸기'], answer: '딸기' },
+        { img: '🍊', choices: ['오렌지', '수박', '복숭아', '배'], answer: '오렌지' },
+        { img: '🍉', choices: ['오렌지', '수박', '복숭아', '배'], answer: '수박' },
+        { img: '🍑', choices: ['오렌지', '수박', '복숭아', '배'], answer: '복숭아' },
+        { img: '🍐', choices: ['오렌지', '수박', '복숭아', '배'], answer: '배' },
+        { img: '🥕', choices: ['당근', '감자', '고구마', '무'], answer: '당근' },
+        { img: '🥔', choices: ['당근', '감자', '고구마', '무'], answer: '감자' },
       ]
     };
     const COLOR_MAP = {
@@ -149,6 +181,14 @@
       green: '#93c47d',
       yellow: '#ffd966',
       black: '#444',
+      '빨강': '#e06666',
+      '파랑': '#6fa8dc',
+      '초록': '#93c47d',
+      '노랑': '#ffd966',
+      'GREEN': '#93c47d',
+      'BLUE': '#6fa8dc',
+      'YELLOW': '#ffd966',
+      'RED': '#e06666',
     };
     let currentMode = null;
     let currentIdx = 0;
@@ -179,10 +219,16 @@
       }
       let choicesHTML = '<div class="choices">';
       q.choices.forEach(choice => {
-        choicesHTML += `<button class="choice-btn" onclick="checkAnswer('${choice}')">${choice}</button>`;
+        let style = '';
+        if (currentMode === 'kor' || currentMode === 'eng') {
+          style = `background:${COLOR_MAP[choice]||'#eee'};color:${['yellow','노랑','YELLOW'].includes(choice)?'#b45f06':'#fff'};`;
+        }
+        choicesHTML += `<button class="choice-btn" style="${style}" onclick="checkAnswer('${choice}')">${choice}</button>`;
       });
       choicesHTML += '</div>';
-      area.innerHTML = questionHTML + choicesHTML + '<div class="result" id="result"></div>';
+      // 돌아가기 버튼 추가
+      const backBtn = '<button class="next-btn" style="margin-top:2em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>';
+      area.innerHTML = questionHTML + choicesHTML + '<div class="result" id="result"></div>' + backBtn;
     }
 
     function checkAnswer(choice) {
@@ -212,7 +258,7 @@
 
     function showResult() {
       const area = document.getElementById('gameArea');
-      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode].length}</div><button class="next-btn" onclick="restart()">다시하기</button>`;
+      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode].length}</div><button class="next-btn" onclick="restart()">다시하기</button><button class="next-btn" style="margin-left:1em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>`;
     }
 
     function restart() {
@@ -226,6 +272,12 @@
       if (shape === 'square') return '■';
       if (shape === 'star') return '★';
       return '?';
+    }
+
+    // 모드 선택화면으로 돌아가기 함수
+    function goToModeSelect() {
+      document.getElementById('modeScreen').style.display = 'flex';
+      document.getElementById('gameArea').style.display = 'none';
     }
   </script>
 </body>
