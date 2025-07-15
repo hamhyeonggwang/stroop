@@ -122,6 +122,11 @@
       <button class="mode-btn baby" onclick="startGame('baby')">베이비 모드</button>
     </div>
     <div id="gameArea" class="game-area" style="display:none;"></div>
+    <div id="timerArea" style="display:none;width:100%;margin-top:1em;justify-content:center;align-items:center;">
+      <span style="font-size:1.5em;">🕒</span>
+      <span id="timer" style="font-size:1.3em;margin-left:0.5em;min-width:3em;display:inline-block;">0.0</span>
+      <span style="font-size:1.1em;margin-left:0.2em;">초</span>
+    </div>
   </div>
   <script>
     // 문제 데이터 예시
@@ -193,11 +198,21 @@
     let currentMode = null;
     let currentIdx = 0;
     let score = 0;
+    let timer = 0;
+    let timerInterval = null;
 
     function startGame(mode) {
       currentMode = mode;
       currentIdx = 0;
       score = 0;
+      timer = 0;
+      document.getElementById('timer').textContent = '0.0';
+      document.getElementById('timerArea').style.display = 'flex';
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timer += 0.1;
+        document.getElementById('timer').textContent = timer.toFixed(1);
+      }, 100);
       document.getElementById('modeScreen').style.display = 'none';
       document.getElementById('gameArea').style.display = 'flex';
       showQuestion();
@@ -258,7 +273,8 @@
 
     function showResult() {
       const area = document.getElementById('gameArea');
-      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode].length}</div><button class="next-btn" onclick="restart()">다시하기</button><button class="next-btn" style="margin-left:1em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>`;
+      if (timerInterval) clearInterval(timerInterval);
+      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode].length}<br>총 소요 시간: <span style='font-weight:bold;'>${timer.toFixed(1)}초</span></div><button class="next-btn" onclick="restart()">다시하기</button><button class="next-btn" style="margin-left:1em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>`;
     }
 
     function restart() {
@@ -278,6 +294,8 @@
     function goToModeSelect() {
       document.getElementById('modeScreen').style.display = 'flex';
       document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('timerArea').style.display = 'none';
+      if (timerInterval) clearInterval(timerInterval);
     }
   </script>
 </body>
