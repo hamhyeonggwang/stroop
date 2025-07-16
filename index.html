@@ -297,7 +297,7 @@
     }
 
     function checkAnswer(choice) {
-      const q = QUESTIONS[currentMode][currentIdx];
+      const q = QUESTIONS[currentMode+"_shuffled"][currentIdx];
       const result = document.getElementById('result');
       if (choice === q.answer) {
         score++;
