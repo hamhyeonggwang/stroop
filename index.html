@@ -116,6 +116,11 @@
   <div class="container">
     <h1>STROOP<br>GAME</h1>
     <div id="modeScreen" class="mode-select">
+      <div id="difficultyArea" style="display:flex;gap:10px;justify-content:center;margin-bottom:1em;">
+        <button class="mode-btn" style="background:#ffd966;color:#b45f06;" onclick="selectDifficulty('easy')">쉬움</button>
+        <button class="mode-btn" style="background:#6fa8dc;color:#fff;" onclick="selectDifficulty('normal')">보통</button>
+        <button class="mode-btn" style="background:#e06666;color:#fff;" onclick="selectDifficulty('hard')">어려움</button>
+      </div>
       <button class="mode-btn kor" onclick="startGame('kor')">한글 모드</button>
       <button class="mode-btn eng" onclick="startGame('eng')">영어 모드</button>
       <button class="mode-btn shape" onclick="startGame('shape')">모양 모드</button>
@@ -200,6 +205,18 @@
     let score = 0;
     let timer = 0;
     let timerInterval = null;
+    let currentDifficulty = 'normal';
+    const DIFFICULTY_MAP = { easy: 5, normal: 10, hard: 20 };
+
+    function selectDifficulty(diff) {
+      currentDifficulty = diff;
+      // 버튼 스타일 업데이트
+      const btns = document.querySelectorAll('#difficultyArea button');
+      btns.forEach(btn => btn.style.outline = 'none');
+      if (diff === 'easy') btns[0].style.outline = '3px solid #b45f06';
+      if (diff === 'normal') btns[1].style.outline = '3px solid #6fa8dc';
+      if (diff === 'hard') btns[2].style.outline = '3px solid #e06666';
+    }
 
     function startGame(mode) {
       currentMode = mode;
@@ -215,13 +232,30 @@
       }, 100);
       document.getElementById('modeScreen').style.display = 'none';
       document.getElementById('gameArea').style.display = 'flex';
+      // 난이도에 따라 문제 셔플 및 개수 조정
+      shuffleQuestions();
       showQuestion();
+    }
+
+    function shuffleQuestions() {
+      // QUESTIONS[currentMode]에서 난이도에 맞는 개수만큼 랜덤 추출
+      const arr = QUESTIONS[currentMode];
+      let n = DIFFICULTY_MAP[currentDifficulty] || 10;
+      // 문제 수가 부족하면 최대치로
+      if (arr.length < n) n = arr.length;
+      // 피셔-예이츠 셔플
+      let shuffled = arr.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      QUESTIONS[currentMode+"_shuffled"] = shuffled.slice(0, n);
     }
 
     function showQuestion() {
       const area = document.getElementById('gameArea');
       area.innerHTML = '';
-      const q = QUESTIONS[currentMode][currentIdx];
+      const q = QUESTIONS[currentMode+"_shuffled"][currentIdx];
       let questionHTML = '';
       if (currentMode === 'kor') {
         questionHTML = `<div class="question" style="color:${COLOR_MAP[q.color]}">${q.word}</div>`;
@@ -264,7 +298,7 @@
 
     function nextQuestion() {
       currentIdx++;
-      if (currentIdx >= QUESTIONS[currentMode].length) {
+      if (currentIdx >= QUESTIONS[currentMode+"_shuffled"].length) {
         showResult();
       } else {
         showQuestion();
@@ -274,7 +308,7 @@
     function showResult() {
       const area = document.getElementById('gameArea');
       if (timerInterval) clearInterval(timerInterval);
-      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode].length}<br>총 소요 시간: <span style='font-weight:bold;'>${timer.toFixed(1)}초</span></div><button class="next-btn" onclick="restart()">다시하기</button><button class="next-btn" style="margin-left:1em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>`;
+      area.innerHTML = `<div class="result">점수: ${score} / ${QUESTIONS[currentMode+"_shuffled"].length}<br>총 소요 시간: <span style='font-weight:bold;'>${timer.toFixed(1)}초</span></div><button class="next-btn" onclick="restart()">다시하기</button><button class="next-btn" style="margin-left:1em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>`;
     }
 
     function restart() {
@@ -296,7 +330,12 @@
       document.getElementById('gameArea').style.display = 'none';
       document.getElementById('timerArea').style.display = 'none';
       if (timerInterval) clearInterval(timerInterval);
+      // 난이도 버튼 스타일 초기화
+      selectDifficulty(currentDifficulty);
     }
+
+    // 페이지 로드시 기본 난이도 선택
+    window.onload = () => { selectDifficulty('normal'); };
   </script>
 </body>
 </html> 
