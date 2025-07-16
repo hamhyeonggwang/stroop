@@ -121,10 +121,15 @@
         <button class="mode-btn" style="background:#6fa8dc;color:#fff;" onclick="selectDifficulty('normal')">보통</button>
         <button class="mode-btn" style="background:#e06666;color:#fff;" onclick="selectDifficulty('hard')">어려움</button>
       </div>
-      <button class="mode-btn kor" onclick="startGame('kor')">한글 모드</button>
-      <button class="mode-btn eng" onclick="startGame('eng')">영어 모드</button>
-      <button class="mode-btn shape" onclick="startGame('shape')">모양 모드</button>
-      <button class="mode-btn baby" onclick="startGame('baby')">베이비 모드</button>
+      <button class="mode-btn kor" onclick="selectMode('kor')">한글 모드</button>
+      <button class="mode-btn eng" onclick="selectMode('eng')">영어 모드</button>
+      <button class="mode-btn shape" onclick="selectMode('shape')">모양 모드</button>
+      <button class="mode-btn baby" onclick="selectMode('baby')">베이비 모드</button>
+    </div>
+    <div id="startScreen" class="game-area" style="display:none;">
+      <div id="selectedModeTitle" class="question"></div>
+      <button class="next-btn" style="margin-top:2em;" onclick="startGame()">게임 시작</button>
+      <button class="next-btn" style="margin-top:2em;background:#6fa8dc;" onclick="goToModeSelect()">게임 선택화면으로</button>
     </div>
     <div id="gameArea" class="game-area" style="display:none;"></div>
     <div id="timerArea" style="display:none;width:100%;margin-top:1em;justify-content:center;align-items:center;">
@@ -218,8 +223,19 @@
       if (diff === 'hard') btns[2].style.outline = '3px solid #e06666';
     }
 
-    function startGame(mode) {
+    function selectMode(mode) {
       currentMode = mode;
+      document.getElementById('modeScreen').style.display = 'none';
+      document.getElementById('startScreen').style.display = 'flex';
+      let title = '';
+      if (mode === 'kor') title = '한글 모드';
+      if (mode === 'eng') title = '영어 모드';
+      if (mode === 'shape') title = '모양 모드';
+      if (mode === 'baby') title = '베이비 모드';
+      document.getElementById('selectedModeTitle').textContent = title;
+    }
+
+    function startGame() {
       currentIdx = 0;
       score = 0;
       timer = 0;
@@ -230,7 +246,7 @@
         timer += 0.1;
         document.getElementById('timer').textContent = timer.toFixed(1);
       }, 100);
-      document.getElementById('modeScreen').style.display = 'none';
+      document.getElementById('startScreen').style.display = 'none';
       document.getElementById('gameArea').style.display = 'flex';
       // 난이도에 따라 문제 셔플 및 개수 조정
       shuffleQuestions();
@@ -328,6 +344,7 @@
     function goToModeSelect() {
       document.getElementById('modeScreen').style.display = 'flex';
       document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('startScreen').style.display = 'none';
       document.getElementById('timerArea').style.display = 'none';
       if (timerInterval) clearInterval(timerInterval);
       // 난이도 버튼 스타일 초기화
