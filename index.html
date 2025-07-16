@@ -284,8 +284,38 @@
       } else if (currentMode === 'baby') {
         questionHTML = `<div class="question"><span style="font-size:3em;">${q.img}</span></div>`;
       }
+      // 난이도별 선택지 개수
+      const choiceCountMap = { easy: 4, normal: 6, hard: 8 };
+      const choiceCount = choiceCountMap[currentDifficulty] || 4;
+      // 모든 선택지 후보
+      let allChoices = q.choices.slice();
+      // 정답이 없으면 추가
+      if (!allChoices.includes(q.answer)) allChoices.push(q.answer);
+      // 선택지 후보가 부족하면 다른 문제에서 보충
+      if (allChoices.length < choiceCount) {
+        let pool = [];
+        QUESTIONS[currentMode].forEach(qq => {
+          qq.choices.forEach(c => { if (!allChoices.includes(c)) pool.push(c); });
+        });
+        while (allChoices.length < choiceCount && pool.length > 0) {
+          const idx = Math.floor(Math.random() * pool.length);
+          allChoices.push(pool[idx]);
+          pool.splice(idx, 1);
+        }
+      }
+      // 셔플
+      for (let i = allChoices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allChoices[i], allChoices[j]] = [allChoices[j], allChoices[i]];
+      }
+      // 최종 선택지
+      const finalChoices = allChoices.slice(0, choiceCount);
+      // 정답이 빠졌으면 랜덤 위치에 삽입
+      if (!finalChoices.includes(q.answer)) {
+        finalChoices[Math.floor(Math.random()*finalChoices.length)] = q.answer;
+      }
       let choicesHTML = '<div class="choices">';
-      q.choices.forEach(choice => {
+      finalChoices.forEach(choice => {
         let style = '';
         if (currentMode === 'kor' || currentMode === 'eng') {
           style = `background:${COLOR_MAP[choice]||'#eee'};color:${['yellow','노랑','YELLOW'].includes(choice)?'#b45f06':'#fff'};`;
